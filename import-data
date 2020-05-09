@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  curl commands to reload the data from the previous tutorial
+#  curl commands to load the data (sensor, groups, etc_)
 #
 #
 
@@ -27,6 +27,112 @@ curl -s -o /dev/null -X POST \
   ]
 }'
 
+
+#
+# Notify Cygnus Mongo-DB of all context changes
+#
+curl --location --request POST 'http://192.168.0.150:1026/v2/subscriptions' \
+--header 'Content-Type: application/json' \
+--header 'fiware-service: openiot' \
+--header 'fiware-servicepath: /' \
+--header 'Content-Type: text/plain' \
+--data-raw '{
+  "description": "Notify Cygnus Mongo-DB of all context changes",
+  "subject": {
+    "entities": [
+      {
+        "idPattern": ".*"
+      }
+    ]
+  },
+  "notification": {
+    "http": {
+      "url": "http://192.168.0.150:5051/notify"
+    }
+  },
+  "throttling": 1
+}'
+
+
+#
+# Notify ContextConsumer of all context changes
+#
+curl --location --request POST 'http://192.168.0.150:1026/v2/subscriptions' \
+--header 'Content-Type: application/json' \
+--header 'fiware-service: openiot' \
+--header 'fiware-servicepath: /' \
+--header 'Content-Type: text/plain' \
+--data-raw '{
+  "description": "Notify ContextConsumer of all context changes",
+  "subject": {
+    "entities": [
+      {
+        "idPattern": ".*"
+      }
+    ],
+    "devices": {
+    	"idPattern": ".*"
+    }
+  },
+  "notification": {
+    "http": {
+      "url": "http://192.168.0.150:1880/notify"
+    }
+  },
+  "throttling": 1
+}'
+
+#
+# IoT Agent - Create a Service Group
+#
+curl --location --request POST 'http://192.168.0.150:4041/iot/services' \
+--header 'fiware-service: openiot' \
+--header 'fiware-servicepath: /' \
+--header 'Content-Type: application/json' \
+--header 'Content-Type: text/plain' \
+--data-raw '{
+ "services": [
+   {
+     "apikey":      "4jggokgpepnvsb2uv4s40d59ov",
+     "cbroker":     "http://192.168.0.150:1026",
+     "entity_type": "Thing",
+     "resource":    "/iot/d"
+   }
+ ]
+}'
+
+#
+# IoT Agent - Provision a Sensor
+#
+curl --location --request POST 'http://192.168.0.150:4041/iot/devices' \
+--header 'fiware-service: openiot' \
+--header 'fiware-servicepath: /' \
+--header 'Content-Type: application/json' \
+--header 'Content-Type: text/plain' \
+--data-raw '{
+ "devices": [
+   {
+     "device_id":   "tasmota001",
+     "entity_name": "urn:ngsi-ld:Tasmota:001",
+     "entity_type": "Tasmota",
+     "protocol":    "PDI-IoTA-UltraLight",
+     "endpoint": "http://192.168.0.150:1880/cmnd",
+     "transport":   "MQTT",
+     "attributes": [
+       { "object_id": "a", "name":"amperes", "type":"Double"},
+	   { "object_id": "v", "name":"voltage", "type":"Double"},
+	   {"object_id": "s", "name": "state", "type":"Text"}
+      ],
+	  "commands": [ 
+        {"name": "on","type": "command"},
+        {"name": "off","type": "command"}
+       ],
+      "static_attributes": [
+         {"name":"refHome", "type": "Relationship","value": "urn:ngsi-ld:Home:001"}
+      ]
+   }
+ ]
+}'
 
 
 echo -e " \033[1;32mdone\033[0m"
