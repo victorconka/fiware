@@ -31,12 +31,11 @@ curl -s -o /dev/null -X POST \
 #
 # Notify Cygnus Mongo-DB of all context changes
 #
-curl --location --request POST 'http://192.168.0.150:1026/v2/subscriptions' \
+curl -s -o /dev/null -X POST 'http://192.168.0.150:1026/v2/subscriptions' \
 --header 'Content-Type: application/json' \
 --header 'fiware-service: openiot' \
 --header 'fiware-servicepath: /' \
---header 'Content-Type: text/plain' \
---data-raw '{
+  -g -d '{
   "description": "Notify Cygnus Mongo-DB of all context changes",
   "subject": {
     "entities": [
@@ -61,7 +60,6 @@ curl --location --request POST 'http://192.168.0.150:1026/v2/subscriptions' \
 --header 'Content-Type: application/json' \
 --header 'fiware-service: openiot' \
 --header 'fiware-servicepath: /' \
---header 'Content-Type: text/plain' \
 --data-raw '{
   "description": "Notify ContextConsumer of all context changes",
   "subject": {
@@ -89,7 +87,6 @@ curl --location --request POST 'http://192.168.0.150:4041/iot/services' \
 --header 'fiware-service: openiot' \
 --header 'fiware-servicepath: /' \
 --header 'Content-Type: application/json' \
---header 'Content-Type: text/plain' \
 --data-raw '{
  "services": [
    {
@@ -108,7 +105,6 @@ curl --location --request POST 'http://192.168.0.150:4041/iot/devices' \
 --header 'fiware-service: openiot' \
 --header 'fiware-servicepath: /' \
 --header 'Content-Type: application/json' \
---header 'Content-Type: text/plain' \
 --data-raw '{
  "devices": [
    {
