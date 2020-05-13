@@ -115,7 +115,7 @@ curl --location --request POST 'http://192.168.0.150:4041/iot/devices' \
      "transport":   "MQTT",
      "attributes": [
        { "object_id": "a", "name":"amperes", "type":"Float"},
-	   { "object_id": "v", "name":"voltage", "type":"Float"},
+	   { "object_id": "v", "name":"voltage", "type":"Integer"},
 	   {"object_id": "s", "name": "state", "type":"Text"}
       ],
 	  "commands": [ 

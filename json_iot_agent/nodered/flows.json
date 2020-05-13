@@ -345,7 +345,7 @@
         "func": "msg = {\n  'headers': {\n    'fiware-service': 'openiot',\n    'fiware-servicepath': '/',\n    'Content-Type': 'application/json'\n  },\n  'payload':{\n    \"actionType\": \"update\",\n    \"entities\": [\n        {\n            \"type\": \"Tasmota\",\n            \"id\": \"urn:ngsi-ld:Tasmota:001\",\n            \"on\" : {\n                \"type\": \"command\",\n                \"value\": \"on\"\n            }\n        }\n    ]\n  }\n};\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 470,
+        "x": 510,
         "y": 620,
         "wires": [
             [
@@ -365,7 +365,7 @@
         "tls": "",
         "proxy": "",
         "authType": "",
-        "x": 650,
+        "x": 710,
         "y": 640,
         "wires": [
             []
@@ -379,7 +379,7 @@
         "func": "msg = {\n  'headers': {\n    'fiware-service': 'openiot',\n    'fiware-servicepath': '/',\n    'Content-Type': 'application/json'\n  },\n  'payload':{\n    \"actionType\": \"update\",\n    \"entities\": [\n        {\n            \"type\": \"Tasmota\",\n            \"id\": \"urn:ngsi-ld:Tasmota:001\",\n            \"off\" : {\n                \"type\": \"command\",\n                \"value\": \"off\"\n            }\n        }\n    ]\n  }\n};\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 470,
+        "x": 510,
         "y": 680,
         "wires": [
             [
@@ -408,7 +408,7 @@
         "type": "function",
         "z": "cea2dc7f.f67978",
         "name": "amperes",
-        "func": "var amperes = msg.payload.data[0].amperes.value;\nmsg.payload = amperes;\nreturn msg;",
+        "func": "var amperes = msg.payload.data[0].amperes.value.value;\nmsg.payload = amperes;\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "x": 340,
@@ -424,7 +424,7 @@
         "type": "function",
         "z": "cea2dc7f.f67978",
         "name": "voltage",
-        "func": "var voltage = msg.payload.data[0].voltage.value;\nvar instant = msg.payload.data[0].TimeInstant.value;\nmsg.payload =voltage;\nmsg.timestamp = instant;\nreturn msg;",
+        "func": "var voltage = msg.payload.data[0].voltage.value.value;\nvar instant = msg.payload.data[0].TimeInstant.value;\nmsg.payload =voltage;\nmsg.timestamp = instant;\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "x": 340,
@@ -464,7 +464,7 @@
         "y": 180,
         "wires": [
             [
-                "ed5a640b.c1a3f8"
+                "56a3029f.38d874"
             ]
         ]
     },
@@ -477,7 +477,7 @@
         "qos": "2",
         "retain": "",
         "broker": "60f14d53.b26944",
-        "x": 560,
+        "x": 700,
         "y": 180,
         "wires": []
     },
@@ -486,10 +486,10 @@
         "type": "function",
         "z": "9ebad34e.d43948",
         "name": "splitCmnd",
-        "func": "var options = msg.payload.split('|');\nmsg.payload = options[1].toUpperCase();\nglobal.set(\"state\",options[1].toUpperCase());\nreturn msg;",
+        "func": "var option = Object.keys(msg.payload)[0];//msg.payload.split('|');\nmsg.payload = option.toUpperCase();\nglobal.set(\"state\",option.toUpperCase());\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 360,
+        "x": 500,
         "y": 180,
         "wires": [
             [
@@ -629,7 +629,7 @@
         "type": "function",
         "z": "9ebad34e.d43948",
         "name": "StatusSNS",
-        "func": "var state = global.get(\"state\");\nvar voltage = msg.payload.StatusSNS.ENERGY.Voltage;\nvar current = msg.payload.StatusSNS.ENERGY.Current;\n\n//msg.payload = \"v|\"+voltage+\"|a|\"+current+\"|s|\" + state;\nmsg.payload = {\n    \"v\": voltage,\n    \"a\": current,\n    \"s\": state\n}\n\nreturn msg;",
+        "func": "var state = global.get(\"state\");\nvar voltage = msg.payload.StatusSNS.ENERGY.Voltage;\nvar current = msg.payload.StatusSNS.ENERGY.Current;\n\n//msg.payload = \"v|\"+voltage+\"|a|\"+current+\"|s|\" + state;\nmsg.payload = {\n    \"v\": {\"value\": voltage},\n    \"a\": {\"value\": current},\n    \"s\": state\n}\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "x": 510,
@@ -731,7 +731,7 @@
         "type": "function",
         "z": "cea2dc7f.f67978",
         "name": "voltage",
-        "func": "var voltage = msg.payload.data[0].voltage.value;\nmsg.payload = voltage;\nreturn msg;",
+        "func": "var voltage = msg.payload.data[0].voltage.value.value;\nmsg.payload = voltage;\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "x": 340,
@@ -763,7 +763,7 @@
         "type": "debug",
         "z": "9ebad34e.d43948",
         "name": "",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -795,7 +795,7 @@
         "type": "function",
         "z": "cea2dc7f.f67978",
         "name": "amperesC",
-        "func": "var amperes = msg.payload.data[0].amperes.value;\nvar instant = msg.payload.data[0].TimeInstant.value;\nmsg.payload = amperes;\nmsg.timestamp = instant;\nreturn msg;",
+        "func": "var amperes = msg.payload.data[0].amperes.value.value;\nvar instant = msg.payload.data[0].TimeInstant.value;\nmsg.payload = amperes;\nmsg.timestamp = instant;\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "x": 350,
@@ -911,7 +911,7 @@
         "type": "debug",
         "z": "cea2dc7f.f67978",
         "name": "",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -1003,5 +1003,36 @@
         "x": 730,
         "y": 640,
         "wires": []
+    },
+    {
+        "id": "b422231a.7f2f18",
+        "type": "debug",
+        "z": "9ebad34e.d43948",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 530,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "56a3029f.38d874",
+        "type": "json",
+        "z": "9ebad34e.d43948",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 330,
+        "y": 180,
+        "wires": [
+            [
+                "b422231a.7f2f18",
+                "ed5a640b.c1a3f8"
+            ]
+        ]
     }
 ]
