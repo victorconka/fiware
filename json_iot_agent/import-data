@@ -111,12 +111,11 @@ curl --location --request POST 'http://192.168.0.150:4041/iot/devices' \
      "device_id":   "tasmota001",
      "entity_name": "urn:ngsi-ld:Tasmota:001",
      "entity_type": "Tasmota",
-     "protocol":    "PDI-IoTA-UltraLight",
      "endpoint": "http://192.168.0.150:1880/cmnd",
      "transport":   "MQTT",
      "attributes": [
-       { "object_id": "a", "name":"amperes", "type":"Double"},
-	   { "object_id": "v", "name":"voltage", "type":"Double"},
+       { "object_id": "a", "name":"amperes", "type":"Float"},
+	   { "object_id": "v", "name":"voltage", "type":"Float"},
 	   {"object_id": "s", "name": "state", "type":"Text"}
       ],
 	  "commands": [ 
