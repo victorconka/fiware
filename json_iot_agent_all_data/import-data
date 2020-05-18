@@ -1,0 +1,134 @@
+#!/bin/bash
+#
+#  curl commands to load the data (sensor, groups, etc_)
+#
+#
+
+set -e
+
+printf "⏳ Loading context data "
+
+#
+# Create four Home Entities in various locations across Berlin
+#
+curl -s -o /dev/null -X POST \
+  'http://192.168.0.150:1026/v2/op/update' \
+  -H 'Content-Type: application/json' \
+  -g -d '{
+  "actionType": "append",
+  "entities": [
+  	{
+  		"id":"urn:ngsi-ld:Home:001",
+  		"type":"Home",
+  		"address":{"type":"PostalAddress","value":{"streetAddress":"Bornholmer Straße 65","addressRegion":"Berlin","addressLocality":"Prenzlauer Berg","postalCode":"10439"}},
+  		"location":{"type":"geo:json","value":{"type":"Point","coordinates":[13.3986,52.5547]}},
+  		"name":{"type":"Text","value":"Bösebrücke Einkauf"}
+  	}
+  ]
+}'
+
+
+#
+# Notify Cygnus Mongo-DB of all context changes
+#
+curl -s -o /dev/null -X POST 'http://192.168.0.150:1026/v2/subscriptions' \
+--header 'Content-Type: application/json' \
+--header 'fiware-service: openiot' \
+--header 'fiware-servicepath: /' \
+  -g -d '{
+  "description": "Notify Cygnus Mongo-DB of all context changes",
+  "subject": {
+    "entities": [
+      {
+        "idPattern": ".*"
+      }
+    ]
+  },
+  "notification": {
+    "http": {
+      "url": "http://192.168.0.150:5051/notify"
+    }
+  },
+  "throttling": 1
+}'
+
+
+#
+# Notify ContextConsumer of all context changes
+#
+curl --location --request POST 'http://192.168.0.150:1026/v2/subscriptions' \
+--header 'Content-Type: application/json' \
+--header 'fiware-service: openiot' \
+--header 'fiware-servicepath: /' \
+--data-raw '{
+  "description": "Notify ContextConsumer of all context changes",
+  "subject": {
+    "entities": [
+      {
+        "idPattern": ".*"
+      }
+    ],
+    "devices": {
+    	"idPattern": ".*"
+    }
+  },
+  "notification": {
+    "http": {
+      "url": "http://192.168.0.150:1880/notify"
+    }
+  },
+  "throttling": 1
+}'
+
+#
+# IoT Agent - Create a Service Group
+#
+curl --location --request POST 'http://192.168.0.150:4041/iot/services' \
+--header 'fiware-service: openiot' \
+--header 'fiware-servicepath: /' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+ "services": [
+   {
+     "apikey":      "4jggokgpepnvsb2uv4s40d59ov",
+     "cbroker":     "http://192.168.0.150:1026",
+     "entity_type": "Thing",
+     "resource":    "/iot/d"
+   }
+ ]
+}'
+
+#
+# IoT Agent - Provision a Sensor
+#
+curl --location --request POST 'http://192.168.0.150:4041/iot/devices' \
+--header 'fiware-service: openiot' \
+--header 'fiware-servicepath: /' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+ "devices": [
+   {
+     "device_id":   "tasmota001",
+     "entity_name": "urn:ngsi-ld:Tasmota:001",
+     "entity_type": "Tasmota",
+     "protocol":    "PDI-IoTA-UltraLight",
+     "endpoint": "http://192.168.0.150:1880/cmnd",
+     "transport":   "MQTT",
+     "attributes": [
+       { "object_id": "d", "name":"data", "type":"JSON"},
+	   {"object_id": "s", "name": "state", "type":"Text"}
+      ],
+	  "commands": [ 
+        {"name": "on","type": "command"},
+        {"name": "off","type": "command"}
+       ],
+      "static_attributes": [
+         {"name":"refHome", "type": "Relationship","value": "urn:ngsi-ld:Home:001"}
+      ]
+   }
+ ]
+}'
+
+
+echo -e " \033[1;32mdone\033[0m"
+
